@@ -2,16 +2,18 @@ import requests
 import json
 
 
+path_json_kfc = 'c:\data_rest_kfc.txt'
 url_kfc = 'https://api.kfc.com/api/store/v2/store.get_restaurants' # адрес анализа
+
 r = requests.get(url_kfc) # записываем ответ сервера в переменную r
 address_kfc = r.json() # Получаем данные о ресторанах
 
 count_restaurants = len(address_kfc['searchResults']) # Общее кол-во ресторанов КФС
-data_json = {"count": count_restaurants,
-             "restaurants": []}
+data_json_kfc = {"count": 0,
+                 "restaurants": []}
 
 
-def get_rest(address_kfc,number):
+def get_rest_kfc(address_kfc,number):
     # Пробегаем по нужным нам полям, получаем значения
     try:
         rest_name = address_kfc['searchResults'][number]['storePublic']['title']['ru']
@@ -29,15 +31,20 @@ def get_rest(address_kfc,number):
         return False
 
 
-def main_rest():
+def create_json_rest_kfc():
     # Пробегаем по всем значениям, если не пустые и не вызывают ошибок добавляем в базу
     for id in range(count_restaurants):
-        if get_rest(address_kfc, id)!=False:
-            data_json['restaurants'].append(get_rest(address_kfc, id))
-    # Сохраняем всю базу в файл
-    with open('d:\data_rest_kfc.txt', 'w') as outfile:
-        json.dump(data_json, outfile, ensure_ascii=False)
+        if get_rest_kfc(address_kfc, id)!=False:
+            data_json_kfc['count'] += 1
+            data_json_kfc['restaurants'].append(get_rest_kfc(address_kfc, id))
+
+
+def save_json_rest_kfc(path):
+    # Сохраняем всю базу в файл по указанному пути
+    with open(path, 'w') as outfile:
+        json.dump(data_json_kfc, outfile, ensure_ascii=False)
 
 
 if __name__ == "__main__":
-	main_rest()
+    create_json_rest_kfc()
+    save_json_rest_kfc(path_json_kfc)
